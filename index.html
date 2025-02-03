@@ -9,12 +9,6 @@
     html, body {
       margin: 0;
       padding: 0;
-      /* If you want the "No" button to remain visible even at edges,
-         remove or comment out overflow:hidden. Otherwise, keep it if you
-         really don't want scrollbars, but see the corrected
-         dodgeNoButton() function below. */
-      /* overflow: hidden; */
-
       font-family: Arial, sans-serif;
       background-color: #ffe6e6;
       height: 100vh;
@@ -63,7 +57,7 @@
       display: none;
     }
 
-    /* The hidden text after 2 clicks on "No" */
+    /* The hidden text after 2 "No" clicks */
     #angryMessage {
       margin-top: 10px;
       font-size: 1.5em;
@@ -105,8 +99,7 @@
       }
     }
 
-    /* "claudia" repeated in the background:
-       We dynamically insert these in JavaScript, absolutely positioned. */
+    /* "claudia" repeated in the background (generated in JS) */
     .claudia {
       position: fixed;
       font-size: 2em;
@@ -118,8 +111,12 @@
 </head>
 <body>
 
-  <!-- Audio element for the clapping sound -->
-  <audio id="clapSound" src="https://www.soundjay.com/human/clap-1.mp3" preload="auto"></audio>
+  <!-- Audio element with a reliable clapping sound from Google's hosted sounds -->
+  <audio 
+    id="clapSound" 
+    src="https://actions.google.com/sounds/v1/applause/applause_crowd.ogg" 
+    preload="auto">
+  </audio>
 
   <!-- Fireworks/confetti container -->
   <div id="fireworks"></div>
@@ -139,7 +136,7 @@
 
   <script>
     // 1. Generate lots of "claudia" text in the background.
-    const numClaudias = 50; // Adjust how many you want
+    const numClaudias = 50;
     for (let i = 0; i < numClaudias; i++) {
       const c = document.createElement('div');
       c.classList.add('claudia');
@@ -160,16 +157,20 @@
     yesButton.addEventListener('click', () => {
       // Show fireworks
       fireworks.style.display = 'block';
-      // Play clapping sound
+      
+      // Play the clapping sound (should work as it's triggered by a user click)
       clapSound.currentTime = 0;
-      clapSound.play();
+      clapSound.play().catch(err => {
+        console.log('Audio play failed:', err);
+      });
+
       // Show the happy message
       happyMessage.style.display = 'block';
 
       // Trigger confetti/fake firework animation
-      launchConfetti(150); // 150 confetti pieces
+      launchConfetti(150);
 
-      // Optionally, hide fireworks after a short time
+      // Optionally hide fireworks after a short time
       setTimeout(() => {
         fireworks.style.display = 'none';
       }, 2000);
@@ -203,7 +204,7 @@
           confetti.style.transform = `translate(${x}px, ${y}px)`;
         };
 
-        // run 30 frames (~1 second) then remove
+        // run ~30 frames (~1 second) then remove
         let frames = 0;
         const interval = setInterval(() => {
           frame();
@@ -234,11 +235,11 @@
     });
 
     function dodgeNoButton() {
-      // Calculate how wide and tall the button actually is
+      // Calculate how wide and tall the button is
       const buttonWidth = noButton.offsetWidth;
       const buttonHeight = noButton.offsetHeight;
 
-      // Calculate the maximum X and Y so the button stays fully visible
+      // Calculate the maximum X and Y so the button stays visible
       const maxX = window.innerWidth - buttonWidth;
       const maxY = window.innerHeight - buttonHeight;
 
