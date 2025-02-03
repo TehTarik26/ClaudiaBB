@@ -9,7 +9,12 @@
     html, body {
       margin: 0;
       padding: 0;
-      overflow: hidden; /* So our 'claudia' text doesn’t cause scrollbars */
+      /* If you want the "No" button to remain visible even at edges,
+         remove or comment out overflow:hidden. Otherwise, keep it if you
+         really don't want scrollbars, but see the corrected
+         dodgeNoButton() function below. */
+      /* overflow: hidden; */
+
       font-family: Arial, sans-serif;
       background-color: #ffe6e6;
       height: 100vh;
@@ -229,9 +234,18 @@
     });
 
     function dodgeNoButton() {
-      // Let's pick a random location within the viewport
-      const x = Math.random() * (window.innerWidth - 100); // subtract button width
-      const y = Math.random() * (window.innerHeight - 50); // subtract button height
+      // Calculate how wide and tall the button actually is
+      const buttonWidth = noButton.offsetWidth;
+      const buttonHeight = noButton.offsetHeight;
+
+      // Calculate the maximum X and Y so the button stays fully visible
+      const maxX = window.innerWidth - buttonWidth;
+      const maxY = window.innerHeight - buttonHeight;
+
+      // Randomly place the button somewhere in that range
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
       noButton.style.position = 'absolute';
       noButton.style.left = x + 'px';
       noButton.style.top = y + 'px';
