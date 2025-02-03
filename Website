@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Will you be my Valentine?</title>
+
+  <!-- Simple styling -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* So our 'claudia' text doesn’t cause scrollbars */
+      font-family: Arial, sans-serif;
+      background-color: #ffe6e6;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+
+    /* Container for the main question and buttons */
+    .content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 10; /* On top of the background text */
+    }
+
+    .question {
+      font-size: 2em;
+      color: #d4145a;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 2px #fff;
+    }
+
+    button {
+      font-size: 1.2em;
+      padding: 10px 20px;
+      margin: 0 10px;
+      cursor: pointer;
+      border: 2px solid #d4145a;
+      border-radius: 8px;
+      background-color: #fff;
+      color: #d4145a;
+      transition: transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #ffd6e8;
+      transform: scale(1.05);
+    }
+
+    /* The hidden message after "Yes" */
+    #happyMessage {
+      margin-top: 30px;
+      font-size: 1.5em;
+      color: green;
+      display: none;
+    }
+
+    /* The hidden text after 2 clicks on "No" */
+    #angryMessage {
+      margin-top: 10px;
+      font-size: 1.5em;
+      color: red;
+      display: none;
+    }
+
+    /* Fireworks/confetti container */
+    #fireworks {
+      pointer-events: none; /* So clicks pass through to buttons */
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 999; /* On top of everything */
+      overflow: hidden;
+      display: none; /* Hidden by default */
+    }
+
+    /* Confetti piece style (we'll create many of these in JS) */
+    .confetti {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: #d4145a;
+      border-radius: 50%;
+      animation: pop 1s ease-out forwards;
+    }
+
+    @keyframes pop {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translate(0, -100px) scale(0.6);
+        opacity: 0;
+      }
+    }
+
+    /* "claudia" repeated in the background:
+       We dynamically insert these in JavaScript, absolutely positioned. */
+    .claudia {
+      position: fixed;
+      font-size: 2em;
+      color: rgba(212, 20, 90, 0.1);
+      transform: rotate(15deg);
+      pointer-events: none; /* So it doesn’t interfere with clicks */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Audio element for the clapping sound -->
+  <audio id="clapSound" src="https://www.soundjay.com/human/clap-1.mp3" preload="auto"></audio>
+
+  <!-- Fireworks/confetti container -->
+  <div id="fireworks"></div>
+
+  <!-- Main content -->
+  <div class="content">
+    <div class="question">Will you be my Valentine?</div>
+    <button id="yesButton">Yes</button>
+    <button id="noButton">No</button>
+
+    <!-- Show after "Yes" -->
+    <div id="happyMessage">yew xiang is a happy boy</div>
+
+    <!-- Show after 2 "No" clicks -->
+    <div id="angryMessage">fk you smelly bitch</div>
+  </div>
+
+  <script>
+    // 1. Generate lots of "claudia" text in the background.
+    const numClaudias = 50; // Adjust how many you want
+    for (let i = 0; i < numClaudias; i++) {
+      const c = document.createElement('div');
+      c.classList.add('claudia');
+      c.textContent = 'claudia';
+      c.style.top = Math.random() * 100 + '%';
+      c.style.left = Math.random() * 100 + '%';
+      c.style.transform = 'rotate(' + (Math.random() * 360) + 'deg)';
+      c.style.fontSize = (1 + Math.random() * 2) + 'em';
+      document.body.appendChild(c);
+    }
+
+    // 2. Handle the "Yes" button click
+    const yesButton = document.getElementById('yesButton');
+    const fireworks = document.getElementById('fireworks');
+    const clapSound = document.getElementById('clapSound');
+    const happyMessage = document.getElementById('happyMessage');
+
+    yesButton.addEventListener('click', () => {
+      // Show fireworks
+      fireworks.style.display = 'block';
+      // Play clapping sound
+      clapSound.currentTime = 0;
+      clapSound.play();
+      // Show the happy message
+      happyMessage.style.display = 'block';
+
+      // Trigger confetti/fake firework animation
+      launchConfetti(150); // 150 confetti pieces
+
+      // Optionally, hide fireworks after a short time
+      setTimeout(() => {
+        fireworks.style.display = 'none';
+      }, 2000);
+    });
+
+    // Simple confetti generator
+    function launchConfetti(amount) {
+      for (let i = 0; i < amount; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        // position around center
+        confetti.style.left = (window.innerWidth / 2) + 'px';
+        confetti.style.top = (window.innerHeight / 2) + 'px';
+
+        // random velocity/angle
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = Math.random() * 8 + 2; // random speed
+        const vx = Math.cos(angle) * speed;
+        const vy = Math.sin(angle) * speed;
+
+        fireworks.appendChild(confetti);
+
+        // Animate each confetti piece
+        let x = 0;
+        let y = 0;
+        const gravity = 0.2;
+
+        const frame = () => {
+          x += vx;
+          y += vy + gravity; // add some gravity
+          confetti.style.transform = `translate(${x}px, ${y}px)`;
+        };
+
+        // run 30 frames (~1 second) then remove
+        let frames = 0;
+        const interval = setInterval(() => {
+          frame();
+          frames++;
+          if (frames > 30) {
+            clearInterval(interval);
+            fireworks.removeChild(confetti);
+          }
+        }, 33); // ~30fps
+      }
+    }
+
+    // 3. Handle the "No" button click
+    const noButton = document.getElementById('noButton');
+    const angryMessage = document.getElementById('angryMessage');
+    let noClickCount = 0;
+
+    noButton.addEventListener('click', () => {
+      noClickCount++;
+
+      // After 2 clicks, show the "fk you smelly bitch" text
+      if (noClickCount === 2) {
+        angryMessage.style.display = 'block';
+      }
+
+      // Reposition the "No" button randomly to dodge
+      dodgeNoButton();
+    });
+
+    function dodgeNoButton() {
+      // Let's pick a random location within the viewport
+      const x = Math.random() * (window.innerWidth - 100); // subtract button width
+      const y = Math.random() * (window.innerHeight - 50); // subtract button height
+      noButton.style.position = 'absolute';
+      noButton.style.left = x + 'px';
+      noButton.style.top = y + 'px';
+    }
+  </script>
+</body>
+</html>
