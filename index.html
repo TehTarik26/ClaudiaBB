@@ -16,14 +16,43 @@
       position: relative;
     }
 
+    /* Northern Lights overlay (behind content, on top of background color) */
+    .northern-lights {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0; /* Behind .content (which has z-index:10) */
+      pointer-events: none;
+      background: linear-gradient(115deg, #002233, #110033, #440066, #330033);
+      background-size: 800% 800%;
+      animation: aurora 15s ease-in-out infinite;
+      opacity: 0.6; /* Adjust to see more/less of the background */
+    }
+
+    /* Animate the gradient for a "shifting colors" effect */
+    @keyframes aurora {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    /* Container for the main question and buttons */
     .content {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      z-index: 10; /* On top of the background text */
-      width: 90%; /* A bit of responsiveness for smaller screens */
+      z-index: 10; /* On top of the background + northern lights */
+      width: 90%; 
       max-width: 600px;
     }
 
@@ -74,12 +103,12 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 999; /* On top of everything */
+      z-index: 999; /* On top of everything else */
       overflow: hidden;
       display: none; /* Hidden by default */
     }
 
-    /* Confetti piece style (we'll create many of these in JS) */
+    /* Confetti piece style */
     .confetti {
       position: absolute;
       width: 8px;
@@ -107,6 +136,7 @@
       color: rgba(212, 20, 90, 0.1);
       transform: rotate(15deg);
       pointer-events: none; /* So it doesn’t interfere with clicks */
+      z-index: 1; /* Just above background color, behind .content */
     }
 
     /* Images for "Yes" and "No" - hidden by default */
@@ -117,9 +147,37 @@
       border: 2px solid #d4145a;
       border-radius: 10px;
     }
+
+    /* Comet (hidden until created dynamically) */
+    .comet {
+      position: fixed;
+      top: 40vh; /* We update it in JS dynamically, anyway */
+      left: -150px; /* start off-screen */
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 20px 20px, rgba(255,255,255,0.8), rgba(255,255,255,0) 70%);
+      box-shadow: 
+        0 0 10px 3px #fff,
+        -20px -2px 30px 10px rgba(255,255,255,0.3); /* simple tail effect */
+      animation: flyComet 3s linear forwards;
+      z-index: 1000; /* on top of everything else except confetti (which is also high) */
+    }
+
+    @keyframes flyComet {
+      0% {
+        transform: translateX(0) rotate(0deg);
+      }
+      100% {
+        transform: translateX(120vw) rotate(360deg);
+      }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Northern Lights overlay -->
+  <div class="northern-lights"></div>
 
   <!-- Audio element with a clapping sound -->
   <audio 
@@ -173,7 +231,7 @@
       // Show fireworks
       fireworks.style.display = 'block';
       
-      // Play the clapping sound (should work if user clicked)
+      // Play the clapping sound
       clapSound.currentTime = 0;
       clapSound.play().catch(err => {
         console.log('Audio play failed:', err);
@@ -190,6 +248,9 @@
       setTimeout(() => {
         fireworks.style.display = 'none';
       }, 2000);
+
+      // Launch a comet
+      createComet();
     });
 
     // Simple confetti generator
@@ -231,6 +292,25 @@
           }
         }, 33); // ~30fps
       }
+    }
+
+    // Comet creation function
+    function createComet() {
+      const comet = document.createElement('div');
+      comet.classList.add('comet');
+      
+      // Random vertical position from 20vh to 60vh
+      const topPos = 20 + Math.random() * 40; 
+      comet.style.top = topPos + 'vh';
+
+      document.body.appendChild(comet);
+
+      // Remove comet after it flies across (3s in our @keyframes)
+      setTimeout(() => {
+        if (comet.parentNode) {
+          comet.parentNode.removeChild(comet);
+        }
+      }, 3000);
     }
 
     // 3. Handle the "No" button click
