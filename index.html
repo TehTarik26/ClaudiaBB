@@ -16,7 +16,6 @@
       position: relative;
     }
 
-    /* Container for the main question and buttons */
     .content {
       position: absolute;
       top: 50%;
@@ -24,6 +23,8 @@
       transform: translate(-50%, -50%);
       text-align: center;
       z-index: 10; /* On top of the background text */
+      width: 90%; /* A bit of responsiveness for smaller screens */
+      max-width: 600px;
     }
 
     .question {
@@ -107,11 +108,20 @@
       transform: rotate(15deg);
       pointer-events: none; /* So it doesn’t interfere with clicks */
     }
+
+    /* Images for "Yes" and "No" - hidden by default */
+    #yesImage, #noImage {
+      display: none;
+      max-width: 100%;
+      margin-top: 20px;
+      border: 2px solid #d4145a;
+      border-radius: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- Audio element with a reliable clapping sound from Google's hosted sounds -->
+  <!-- Audio element with a clapping sound -->
   <audio 
     id="clapSound" 
     src="https://actions.google.com/sounds/v1/applause/applause_crowd.ogg" 
@@ -129,9 +139,13 @@
 
     <!-- Show after "Yes" -->
     <div id="happyMessage">yew xiang is a happy boy</div>
+    <!-- Image that appears below the "Yes" text -->
+    <img id="yesImage" src="yes_image.jpg" alt="Yes Image">
 
     <!-- Show after 2 "No" clicks -->
     <div id="angryMessage">fk you smelly bitch</div>
+    <!-- Image that appears below the "No" text -->
+    <img id="noImage" src="no_image.jpg" alt="No Image">
   </div>
 
   <script>
@@ -153,19 +167,21 @@
     const fireworks = document.getElementById('fireworks');
     const clapSound = document.getElementById('clapSound');
     const happyMessage = document.getElementById('happyMessage');
+    const yesImage = document.getElementById('yesImage');
 
     yesButton.addEventListener('click', () => {
       // Show fireworks
       fireworks.style.display = 'block';
       
-      // Play the clapping sound (should work as it's triggered by a user click)
+      // Play the clapping sound (should work if user clicked)
       clapSound.currentTime = 0;
       clapSound.play().catch(err => {
         console.log('Audio play failed:', err);
       });
 
-      // Show the happy message
+      // Show the happy message and "Yes" image
       happyMessage.style.display = 'block';
+      yesImage.style.display = 'block';
 
       // Trigger confetti/fake firework animation
       launchConfetti(150);
@@ -204,7 +220,7 @@
           confetti.style.transform = `translate(${x}px, ${y}px)`;
         };
 
-        // run ~30 frames (~1 second) then remove
+        // run 30 frames (~1 second) then remove
         let frames = 0;
         const interval = setInterval(() => {
           frame();
@@ -220,10 +236,14 @@
     // 3. Handle the "No" button click
     const noButton = document.getElementById('noButton');
     const angryMessage = document.getElementById('angryMessage');
+    const noImage = document.getElementById('noImage');
     let noClickCount = 0;
 
     noButton.addEventListener('click', () => {
       noClickCount++;
+
+      // Show the "No" image after every "No" click
+      noImage.style.display = 'block';
 
       // After 2 clicks, show the "fk you smelly bitch" text
       if (noClickCount === 2) {
