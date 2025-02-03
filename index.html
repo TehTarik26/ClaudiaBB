@@ -4,55 +4,48 @@
   <meta charset="UTF-8" />
   <title>Will you be my Valentine?</title>
 
-  <!-- Simple styling -->
   <style>
+    /* 
+      1) Reset and basic setup 
+      - We'll remove the old "northern lights" overlay 
+      - We'll make the background flash different colors endlessly
+    */
     html, body {
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
-      background-color: #ffe6e6;
       height: 100vh;
       width: 100vw;
-      position: relative;
+      overflow: hidden; /* so we don't get scrollbars from the background flash */
     }
 
-    /* Northern Lights overlay (behind content, on top of background color) */
-    .northern-lights {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0; /* Behind .content (which has z-index:10) */
-      pointer-events: none;
-      background: linear-gradient(115deg, #002233, #110033, #440066, #330033);
-      background-size: 800% 800%;
-      animation: aurora 15s ease-in-out infinite;
-      opacity: 0.6; /* Adjust to see more/less of the background */
+    /* 
+      2) Disco background flashing 
+      - We define a keyframe that cycles through colors
+      - Then apply it to body with infinite looping
+    */
+    body {
+      animation: discoFlash 4s infinite linear;
     }
 
-    /* Animate the gradient for a "shifting colors" effect */
-    @keyframes aurora {
-      0% {
-        background-position: 0% 50%;
-      }
-      50% {
-        background-position: 100% 50%;
-      }
-      100% {
-        background-position: 0% 50%;
-      }
+    @keyframes discoFlash {
+      0%   { background-color: #ff0000; }
+      20%  { background-color: #00ff00; }
+      40%  { background-color: #0000ff; }
+      60%  { background-color: #ffff00; }
+      80%  { background-color: #ff00ff; }
+      100% { background-color: #ff0000; }
     }
 
-    /* Container for the main question and buttons */
+    /* 3) Container for the main question and buttons */
     .content {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
       text-align: center;
-      z-index: 10; /* On top of the background + northern lights */
-      width: 90%; 
+      z-index: 10;
+      width: 90%;
       max-width: 600px;
     }
 
@@ -73,6 +66,7 @@
       background-color: #fff;
       color: #d4145a;
       transition: transform 0.2s ease;
+      position: relative; /* So we can move it for "No" button */
     }
     button:hover {
       background-color: #ffd6e8;
@@ -97,15 +91,15 @@
 
     /* Fireworks/confetti container */
     #fireworks {
-      pointer-events: none; /* So clicks pass through to buttons */
+      pointer-events: none; 
       position: absolute;
       top: 0;
       left: 0;
       width: 100vw;
       height: 100vh;
-      z-index: 999; /* On top of everything else */
+      z-index: 999; 
       overflow: hidden;
-      display: none; /* Hidden by default */
+      display: none;
     }
 
     /* Confetti piece style */
@@ -113,7 +107,7 @@
       position: absolute;
       width: 8px;
       height: 8px;
-      background-color: #d4145a;
+      background-color: #fff;
       border-radius: 50%;
       animation: pop 1s ease-out forwards;
     }
@@ -135,8 +129,8 @@
       font-size: 2em;
       color: rgba(212, 20, 90, 0.1);
       transform: rotate(15deg);
-      pointer-events: none; /* So it doesn’t interfere with clicks */
-      z-index: 1; /* Just above background color, behind .content */
+      pointer-events: none;
+      z-index: 1;
     }
 
     /* Images for "Yes" and "No" - hidden by default */
@@ -148,36 +142,38 @@
       border-radius: 10px;
     }
 
-    /* Comet (hidden until created dynamically) */
-    .comet {
+    /* 4) Disco Ball (hidden initially) */
+    .disco-ball {
+      display: none; /* shown after pressing "Yes" */
       position: fixed;
-      top: 40vh; /* We update it in JS dynamically, anyway */
-      left: -150px; /* start off-screen */
-      width: 60px;
-      height: 60px;
+      top: 10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: radial-gradient(circle at 20px 20px, rgba(255,255,255,0.8), rgba(255,255,255,0) 70%);
-      box-shadow: 
-        0 0 10px 3px #fff,
-        -20px -2px 30px 10px rgba(255,255,255,0.3); /* simple tail effect */
-      animation: flyComet 3s linear forwards;
-      z-index: 1000; /* on top of everything else except confetti (which is also high) */
+      z-index: 1000;
+      /* Make a CSS pattern to simulate a disco ball */
+      background: 
+        radial-gradient(closest-side, #fff 40%, transparent 60%),
+        repeating-conic-gradient(
+          #ccc 0 10deg,
+          #999 10deg 20deg
+        );
+      background-size: 20px 20px, 40px 40px;
+      background-blend-mode: multiply;
+      box-shadow: 0 0 20px 5px rgba(255,255,255,0.7);
+      animation: spinBall 3s linear infinite;
     }
 
-    @keyframes flyComet {
-      0% {
-        transform: translateX(0) rotate(0deg);
-      }
-      100% {
-        transform: translateX(120vw) rotate(360deg);
-      }
+    @keyframes spinBall {
+      0%   { transform: translateX(-50%) rotate(0deg); }
+      100% { transform: translateX(-50%) rotate(360deg); }
     }
+
   </style>
 </head>
 <body>
-
-  <!-- Northern Lights overlay -->
-  <div class="northern-lights"></div>
 
   <!-- Audio element with a clapping sound -->
   <audio 
@@ -189,7 +185,9 @@
   <!-- Fireworks/confetti container -->
   <div id="fireworks"></div>
 
-  <!-- Main content -->
+  <!-- The "disco ball" element -->
+  <div class="disco-ball" id="discoBall"></div>
+
   <div class="content">
     <div class="question">Will you be my Valentine?</div>
     <button id="yesButton">Yes</button>
@@ -207,7 +205,7 @@
   </div>
 
   <script>
-    // 1. Generate lots of "claudia" text in the background.
+    // 1) Generate lots of "claudia" text in the background
     const numClaudias = 50;
     for (let i = 0; i < numClaudias; i++) {
       const c = document.createElement('div');
@@ -220,17 +218,24 @@
       document.body.appendChild(c);
     }
 
-    // 2. Handle the "Yes" button click
+    // 2) Get references to elements
     const yesButton = document.getElementById('yesButton');
+    const noButton = document.getElementById('noButton');
     const fireworks = document.getElementById('fireworks');
     const clapSound = document.getElementById('clapSound');
     const happyMessage = document.getElementById('happyMessage');
     const yesImage = document.getElementById('yesImage');
+    const angryMessage = document.getElementById('angryMessage');
+    const noImage = document.getElementById('noImage');
+    const discoBall = document.getElementById('discoBall');
 
+    let noClickCount = 0;
+
+    // 3) "Yes" button
     yesButton.addEventListener('click', () => {
-      // Show fireworks
+      // Show fireworks container
       fireworks.style.display = 'block';
-      
+
       // Play the clapping sound
       clapSound.currentTime = 0;
       clapSound.play().catch(err => {
@@ -241,19 +246,19 @@
       happyMessage.style.display = 'block';
       yesImage.style.display = 'block';
 
-      // Trigger confetti/fake firework animation
-      launchConfetti(150);
+      // Trigger confetti with 500 pieces
+      launchConfetti(500);
 
-      // Optionally hide fireworks after a short time
+      // Hide fireworks after a short time
       setTimeout(() => {
         fireworks.style.display = 'none';
-      }, 2000);
+      }, 3000);
 
-      // Launch a comet
-      createComet();
+      // Show the disco ball
+      discoBall.style.display = 'block';
     });
 
-    // Simple confetti generator
+    // 4) Simple confetti generator
     function launchConfetti(amount) {
       for (let i = 0; i < amount; i++) {
         const confetti = document.createElement('div');
@@ -264,24 +269,24 @@
 
         // random velocity/angle
         const angle = Math.random() * 2 * Math.PI;
-        const speed = Math.random() * 8 + 2; // random speed
+        const speed = Math.random() * 8 + 2; 
         const vx = Math.cos(angle) * speed;
         const vy = Math.sin(angle) * speed;
 
         fireworks.appendChild(confetti);
 
-        // Animate each confetti piece
+        // Animate each piece
         let x = 0;
         let y = 0;
         const gravity = 0.2;
 
         const frame = () => {
           x += vx;
-          y += vy + gravity; // add some gravity
+          y += vy + gravity;
           confetti.style.transform = `translate(${x}px, ${y}px)`;
         };
 
-        // run 30 frames (~1 second) then remove
+        // run ~30 frames (~1s) then remove
         let frames = 0;
         const interval = setInterval(() => {
           frame();
@@ -294,35 +299,11 @@
       }
     }
 
-    // Comet creation function
-    function createComet() {
-      const comet = document.createElement('div');
-      comet.classList.add('comet');
-      
-      // Random vertical position from 20vh to 60vh
-      const topPos = 20 + Math.random() * 40; 
-      comet.style.top = topPos + 'vh';
-
-      document.body.appendChild(comet);
-
-      // Remove comet after it flies across (3s in our @keyframes)
-      setTimeout(() => {
-        if (comet.parentNode) {
-          comet.parentNode.removeChild(comet);
-        }
-      }, 3000);
-    }
-
-    // 3. Handle the "No" button click
-    const noButton = document.getElementById('noButton');
-    const angryMessage = document.getElementById('angryMessage');
-    const noImage = document.getElementById('noImage');
-    let noClickCount = 0;
-
+    // 5) "No" button
     noButton.addEventListener('click', () => {
       noClickCount++;
 
-      // Show the "No" image after every "No" click
+      // Show the "No" image every time "No" is clicked
       noImage.style.display = 'block';
 
       // After 2 clicks, show the "fk you smelly bitch" text
@@ -330,20 +311,16 @@
         angryMessage.style.display = 'block';
       }
 
-      // Reposition the "No" button randomly to dodge
+      // Reposition the "No" button randomly
       dodgeNoButton();
     });
 
     function dodgeNoButton() {
-      // Calculate how wide and tall the button is
       const buttonWidth = noButton.offsetWidth;
       const buttonHeight = noButton.offsetHeight;
-
-      // Calculate the maximum X and Y so the button stays visible
       const maxX = window.innerWidth - buttonWidth;
       const maxY = window.innerHeight - buttonHeight;
 
-      // Randomly place the button somewhere in that range
       const x = Math.random() * maxX;
       const y = Math.random() * maxY;
 
