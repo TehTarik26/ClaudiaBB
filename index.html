@@ -4,10 +4,7 @@
   <meta charset="UTF-8" />
   <title>Will you be my Valentine?</title>
   <style>
-    /* 
-      1) Reset and basic setup 
-      - By default, we have a pink background (like your original).
-    */
+    /* Basic setup */
     html, body {
       margin: 0;
       padding: 0;
@@ -16,30 +13,8 @@
       width: 100vw;
       overflow: hidden;
     }
-
-    /* 
-      2) Body's default background (pink)
-      - The disco flash will start only after adding the 'disco-active' class.
-    */
     body {
       background-color: #ffe6e6;
-    }
-
-    /* 
-      3) The disco-active class for body
-      - When we add this, the background starts flashing
-    */
-    body.disco-active {
-      animation: discoFlash 4s infinite linear;
-    }
-
-    @keyframes discoFlash {
-      0%   { background-color: #ff0000; }
-      20%  { background-color: #00ff00; }
-      40%  { background-color: #0000ff; }
-      60%  { background-color: #ffff00; }
-      80%  { background-color: #ff00ff; }
-      100% { background-color: #ff0000; }
     }
 
     /* Container for main question and buttons */
@@ -53,14 +28,12 @@
       width: 90%;
       max-width: 600px;
     }
-
     .question {
       font-size: 2em;
       color: #d4145a;
       margin-bottom: 20px;
       text-shadow: 1px 1px 2px #fff;
     }
-
     button {
       font-size: 1.2em;
       padding: 10px 20px;
@@ -71,26 +44,32 @@
       background-color: #fff;
       color: #d4145a;
       transition: transform 0.2s ease;
-      position: relative;
+      position: relative; /* needed for "No" button dodge */
     }
     button:hover {
       background-color: #ffd6e8;
       transform: scale(1.05);
     }
 
-    /* The hidden message after "Yes" */
+    /* Hidden messages */
     #happyMessage {
       margin-top: 30px;
       font-size: 1.5em;
       color: green;
       display: none;
     }
-
-    /* The hidden text after 2 "No" clicks */
     #angryMessage {
       margin-top: 10px;
       font-size: 1.5em;
       color: red;
+      display: none;
+    }
+
+    /* Final love message shown after heart is complete */
+    #finalLoveMessage {
+      margin-top: 20px;
+      font-size: 1.5em;
+      color: purple;
       display: none;
     }
 
@@ -106,8 +85,6 @@
       overflow: hidden;
       display: none;
     }
-
-    /* Confetti piece style */
     .confetti {
       position: absolute;
       width: 8px;
@@ -116,7 +93,6 @@
       border-radius: 50%;
       animation: pop 1s ease-out forwards;
     }
-
     @keyframes pop {
       0% {
         transform: translate(0, 0) scale(1);
@@ -138,7 +114,7 @@
       z-index: 1;
     }
 
-    /* Images for "Yes" and "No" - hidden by default */
+    /* Images hidden by default */
     #yesImage, #noImage {
       display: none;
       max-width: 100%;
@@ -147,18 +123,15 @@
       border-radius: 10px;
     }
 
-    /* Disco Ball (hidden initially) */
+    /* Disco Ball (for the original & replicated ones) */
     .disco-ball {
-      display: none; 
-      position: fixed;
-      top: 10%;
-      left: 50%;
-      transform: translateX(-50%);
+      display: none; /* The main one appears after "Yes" is clicked */
+      position: fixed; /* or absolute, but fixed is simpler for spinning on screen */
       width: 100px;
       height: 100px;
       border-radius: 50%;
       z-index: 1000;
-      /* Make a CSS pattern to simulate a disco ball */
+      /* Pattern to simulate a disco ball */
       background: 
         radial-gradient(closest-side, #fff 40%, transparent 60%),
         repeating-conic-gradient(
@@ -168,12 +141,13 @@
       background-size: 20px 20px, 40px 40px;
       background-blend-mode: multiply;
       box-shadow: 0 0 20px 5px rgba(255,255,255,0.7);
-      animation: spinBall 3s linear infinite;
+      animation: spinBall 3s linear infinite; /* spin */
+      cursor: pointer; /* so user sees it's clickable */
     }
 
     @keyframes spinBall {
-      0%   { transform: translateX(-50%) rotate(0deg); }
-      100% { transform: translateX(-50%) rotate(360deg); }
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
   </style>
 </head>
@@ -189,7 +163,7 @@
   <!-- Fireworks/confetti container -->
   <div id="fireworks"></div>
 
-  <!-- The "disco ball" element -->
+  <!-- The "main" disco ball -->
   <div class="disco-ball" id="discoBall"></div>
 
   <div class="content">
@@ -199,17 +173,18 @@
 
     <!-- Show after "Yes" -->
     <div id="happyMessage">yew xiang is a happy boy</div>
-    <!-- Image that appears below the "Yes" text -->
     <img id="yesImage" src="yes_image.jpg" alt="Yes Image">
 
     <!-- Show after 2 "No" clicks -->
     <div id="angryMessage">fk you smelly bitch</div>
-    <!-- Image that appears below the "No" text -->
     <img id="noImage" src="no_image.jpg" alt="No Image">
+
+    <!-- Final message after heart is filled -->
+    <div id="finalLoveMessage">I love you, thank you for being my valentine's &lt;3</div>
   </div>
 
   <script>
-    // 1) Generate background "claudia"
+    // ===== 1) Generate background "claudia" =====
     const numClaudias = 50;
     for (let i = 0; i < numClaudias; i++) {
       const c = document.createElement('div');
@@ -222,7 +197,7 @@
       document.body.appendChild(c);
     }
 
-    // 2) DOM references
+    // ===== 2) Get references to DOM elements =====
     const yesButton = document.getElementById('yesButton');
     const noButton = document.getElementById('noButton');
     const fireworks = document.getElementById('fireworks');
@@ -232,14 +207,13 @@
     const angryMessage = document.getElementById('angryMessage');
     const noImage = document.getElementById('noImage');
     const discoBall = document.getElementById('discoBall');
+    const finalLoveMessage = document.getElementById('finalLoveMessage');
 
+    // For the "No" button logic
     let noClickCount = 0;
 
-    // 3) "Yes" button
+    // ===== 3) "Yes" button logic =====
     yesButton.addEventListener('click', () => {
-      // Start the disco-flashing background
-      document.body.classList.add('disco-active');
-
       // Show fireworks container
       fireworks.style.display = 'block';
 
@@ -261,15 +235,22 @@
         fireworks.style.display = 'none';
       }, 3000);
 
-      // Show the disco ball
+      // Show the main disco ball
       discoBall.style.display = 'block';
+      // Position it near the center of the screen (example)
+      discoBall.style.top = '10%';
+      discoBall.style.left = '50%';
+      
+      // Initialize the heart coordinates after the yesImage is displayed
+      setTimeout(initHeartPositions, 200);
     });
 
-    // 4) Confetti generator
+    // ===== 4) Confetti generator =====
     function launchConfetti(amount) {
       for (let i = 0; i < amount; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
+        // position around center
         confetti.style.left = (window.innerWidth / 2) + 'px';
         confetti.style.top = (window.innerHeight / 2) + 'px';
 
@@ -302,19 +283,15 @@
       }
     }
 
-    // 5) "No" button
+    // ===== 5) "No" button logic (dodge + message) =====
     noButton.addEventListener('click', () => {
       noClickCount++;
 
-      // Show the "No" image
-      noImage.style.display = 'block';
+      noImage.style.display = 'block'; // always show the "No" image
 
-      // After 2 clicks, show the "fk you smelly bitch" text
       if (noClickCount === 2) {
         angryMessage.style.display = 'block';
       }
-
-      // Reposition the "No" button randomly
       dodgeNoButton();
     });
 
@@ -330,6 +307,97 @@
       noButton.style.position = 'absolute';
       noButton.style.left = x + 'px';
       noButton.style.top = y + 'px';
+    }
+
+    // ===== 6) Heart replication logic =====
+
+    // An array of offsets (x,y) that form a heart shape. 
+    // We'll place them relative to yesImage's center.
+    // You can tweak or add more points to change the shape/size.
+    const heartOffsets = [
+      {x:-60, y:-40},
+      {x:-40, y:-60},
+      {x:-20, y:-70},
+      {x:  0, y:-70},
+      {x: 20, y:-70},
+      {x: 40, y:-60},
+      {x: 60, y:-40},
+      {x: 60, y:-20},
+      {x: 50, y:   0},
+      {x: 40, y:  20},
+      {x: 30, y:  40},
+      {x: 20, y:  50},
+      {x:  0, y:  60},
+      {x:-20, y:  50},
+      {x:-30, y:  40},
+      {x:-40, y:  20},
+      {x:-50, y:   0},
+      {x:-60, y:-20}
+    ];
+
+    // We'll populate actual screen coordinates here:
+    let heartPositions = [];
+    let heartIndex = 0;
+    let heartIsComplete = false;
+
+    // Once "Yes" is clicked and the yesImage is shown, we can measure its center
+    function initHeartPositions() {
+      const rect = yesImage.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      // Convert each offset to an absolute screen position
+      heartPositions = heartOffsets.map(offset => {
+        return {
+          x: centerX + offset.x,
+          y: centerY + offset.y
+        };
+      });
+
+      // The main disco ball is also clickable
+      // Let's give it the class "disco-ball" for styling & an event listener
+      discoBall.addEventListener('click', replicateBall);
+    }
+
+    // This function gets triggered when any disco ball is clicked
+    function replicateBall(event) {
+      // If we've already filled the heart or can't place 2 more disco balls, do nothing
+      if (heartIsComplete || heartIndex >= heartPositions.length) return;
+
+      // We'll place up to 2 new disco balls (if we have enough space)
+      const numNeeded = Math.min(2, heartPositions.length - heartIndex);
+
+      for (let i = 0; i < numNeeded; i++) {
+        const pos = heartPositions[heartIndex + i];
+        createDiscoBall(pos.x, pos.y);
+      }
+
+      heartIndex += numNeeded;
+
+      // If we've used all heart positions, we stop and show final message
+      if (heartIndex >= heartPositions.length) {
+        heartIsComplete = true;
+        finalLoveMessage.style.display = 'block';
+      }
+    }
+
+    // Create a new disco ball at (x, y), absolutely positioned, clickable
+    function createDiscoBall(x, y) {
+      const newBall = document.createElement('div');
+      newBall.classList.add('disco-ball'); 
+      newBall.style.display = 'block'; 
+      newBall.style.width = '60px';
+      newBall.style.height = '60px';
+      newBall.style.left = x + 'px';
+      newBall.style.top = y + 'px';
+      newBall.style.marginLeft = '-30px'; // so it's centered on x
+      newBall.style.marginTop = '-30px';  // so it's centered on y
+      newBall.addEventListener('click', replicateBall);
+
+      // Because it's "fixed," (or absolute), we can append to body
+      // If "fixed," the top/left are relative to the viewport
+      // If "absolute," they'd be relative to the nearest positioned container
+      document.body.appendChild(newBall);
     }
   </script>
 </body>
