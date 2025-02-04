@@ -126,7 +126,7 @@
     /* Disco Ball (for the original & replicated ones) */
     .disco-ball {
       display: none; /* The main one appears after "Yes" is clicked */
-      position: fixed; /* or absolute, but fixed is simpler for spinning on screen */
+      position: fixed; /* so it stays in place relative to viewport */
       width: 100px;
       height: 100px;
       border-radius: 50%;
@@ -237,11 +237,11 @@
 
       // Show the main disco ball
       discoBall.style.display = 'block';
-      // Position it near the center of the screen (example)
+      // Position it somewhere near the top center
       discoBall.style.top = '10%';
       discoBall.style.left = '50%';
       
-      // Initialize the heart coordinates after the yesImage is displayed
+      // Initialize the heart positions after the yesImage is visible
       setTimeout(initHeartPositions, 200);
     });
 
@@ -311,36 +311,44 @@
 
     // ===== 6) Heart replication logic =====
 
-    // An array of offsets (x,y) that form a heart shape. 
-    // We'll place them relative to yesImage's center.
-    // You can tweak or add more points to change the shape/size.
+    // A bigger heart shape (roughly 240px wide, 300px tall).
+    // It starts at the top center, goes around the left side,
+    // down to the bottom, and back up the right side.
+    // All offsets (x,y) are relative to the center of yesImage.
+    // If you want it even bigger, just increase the absolute values.
     const heartOffsets = [
-      {x:-60, y:-40},
-      {x:-40, y:-60},
-      {x:-20, y:-70},
-      {x:  0, y:-70},
-      {x: 20, y:-70},
-      {x: 40, y:-60},
-      {x: 60, y:-40},
-      {x: 60, y:-20},
-      {x: 50, y:   0},
-      {x: 40, y:  20},
-      {x: 30, y:  40},
-      {x: 20, y:  50},
-      {x:  0, y:  60},
-      {x:-20, y:  50},
-      {x:-30, y:  40},
-      {x:-40, y:  20},
-      {x:-50, y:   0},
-      {x:-60, y:-20}
+      {x:   0, y:-150}, // top center
+      {x:-20, y:-150},
+      {x:-50, y:-140},
+      {x:-80, y:-120},
+      {x:-110, y:-90},
+      {x:-120, y:-60},
+      {x:-120, y:-20},
+      {x:-110, y: 20},
+      {x:-90,  y: 50},
+      {x:-60,  y: 80},
+      {x:-40,  y:100},
+      {x:-20,  y:120},
+      {x:   0, y:130},  // bottom center
+      {x:  20, y:120},
+      {x:  40, y:100},
+      {x:  60, y: 80},
+      {x:  90, y: 50},
+      {x: 110, y: 20},
+      {x: 120, y:-20},
+      {x: 120, y:-60},
+      {x: 110, y:-90},
+      {x:  80, y:-120},
+      {x:  50, y:-140},
+      {x:  20, y:-150}
     ];
 
-    // We'll populate actual screen coordinates here:
+    // We'll store converted absolute screen coordinates here:
     let heartPositions = [];
     let heartIndex = 0;
     let heartIsComplete = false;
 
-    // Once "Yes" is clicked and the yesImage is shown, we can measure its center
+    // After "Yes" is clicked and yesImage is visible, measure its center
     function initHeartPositions() {
       const rect = yesImage.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -355,16 +363,15 @@
       });
 
       // The main disco ball is also clickable
-      // Let's give it the class "disco-ball" for styling & an event listener
       discoBall.addEventListener('click', replicateBall);
     }
 
-    // This function gets triggered when any disco ball is clicked
+    // This function is triggered when any disco ball is clicked
     function replicateBall(event) {
-      // If we've already filled the heart or can't place 2 more disco balls, do nothing
+      // If heart is filled or not enough spots left for 2 new disco balls, check
       if (heartIsComplete || heartIndex >= heartPositions.length) return;
 
-      // We'll place up to 2 new disco balls (if we have enough space)
+      // We'll place up to 2 new disco balls (if we have enough leftover positions)
       const numNeeded = Math.min(2, heartPositions.length - heartIndex);
 
       for (let i = 0; i < numNeeded; i++) {
@@ -388,15 +395,15 @@
       newBall.style.display = 'block'; 
       newBall.style.width = '60px';
       newBall.style.height = '60px';
+      // We'll use position:fixed so it doesn't move if we scroll
       newBall.style.left = x + 'px';
       newBall.style.top = y + 'px';
-      newBall.style.marginLeft = '-30px'; // so it's centered on x
-      newBall.style.marginTop = '-30px';  // so it's centered on y
+      newBall.style.marginLeft = '-30px'; // center on x
+      newBall.style.marginTop = '-30px';  // center on y
+
+      // Make each new disco ball clickable, too
       newBall.addEventListener('click', replicateBall);
 
-      // Because it's "fixed," (or absolute), we can append to body
-      // If "fixed," the top/left are relative to the viewport
-      // If "absolute," they'd be relative to the nearest positioned container
       document.body.appendChild(newBall);
     }
   </script>
